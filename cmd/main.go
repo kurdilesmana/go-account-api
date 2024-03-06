@@ -17,8 +17,14 @@ func main() {
 	e := echo.New()
 
 	// Set Viper to read from .env file
-	viper.SetConfigFile(".env")
-	viper.ReadInConfig()
+	viper.AddConfigPath("./")
+	viper.SetConfigName(".env")
+	viper.SetConfigType("env")
+	viper.AutomaticEnv()
+	err := viper.ReadInConfig()
+	if err != nil {
+		panic(err)
+	}
 
 	// APP configuration
 	APP_NAME := viper.GetString("APP_NAME")

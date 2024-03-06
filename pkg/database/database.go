@@ -22,6 +22,8 @@ func InitDB(DB_Host, DB_User, DB_Password, DB_Name string, DB_Port int, log *log
 	// Auto Migrate the Account struct
 	log.Info(logrus.Fields{}, nil, "start migrate database...")
 	db.AutoMigrate(&domain.Account{})
+	db.AutoMigrate(&domain.Transaction{})
+	db.AutoMigrate(&domain.TransactionDetail{})
 
 	log.Info(logrus.Fields{}, nil, "database connected...")
 	return db

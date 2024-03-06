@@ -13,6 +13,8 @@ import (
 
 type AccountService interface {
 	CreateAccount(account *domain.CreateAccount) (AccountNumber string, err error)
+	BalanceInquiry(balanceInquiry *domain.BalanceInquiry) (Balance float64, err error)
+	TransactionInquiry(transactionInquiry *domain.TransactionInquiry) (Mutations *[]domain.TransactionMutations, err error)
 }
 
 type accountService struct {
@@ -67,6 +69,76 @@ func (s *accountService) CreateAccount(createAccount *domain.CreateAccount) (Acc
 	}
 	if err = s.repo.AccountRepository.Create(tx, &account); err != nil {
 		err = fmt.Errorf("failed to create rekening")
+		s.log.Warn(logrus.Fields{}, nil, err.Error())
+		s.repo.BaseRepository.Rollback(tx)
+		return
+	}
+
+	// commit transacton
+	s.repo.BaseRepository.Commit(tx)
+
+	return
+}
+
+func (s *accountService) BalanceInquiry(balanceInquiry *domain.BalanceInquiry) (Balance float64, err error) {
+	// initiate transaction
+	tx := s.repo.BaseRepository.Begin()
+
+	// validate account exist
+	isExist, err := s.repo.AccountRepository.CheckAccountExistByAccountNUmber(tx, balanceInquiry.AccountNumber)
+	if err != nil {
+		err = fmt.Errorf("failed to check exist rekening")
+		s.log.Warn(logrus.Fields{}, nil, err.Error())
+		s.repo.BaseRepository.Rollback(tx)
+		return
+	}
+
+	if !isExist {
+		err = fmt.Errorf("failed to create, rekening not exist")
+		s.log.Warn(logrus.Fields{}, nil, err.Error())
+		s.repo.BaseRepository.Rollback(tx)
+		return
+	}
+
+	// Get Balance by account number
+	Balance, err = s.repo.AccountRepository.GetBalanceByAccountNumber(tx, balanceInquiry.AccountNumber)
+	if err != nil {
+		err = fmt.Errorf("failed to get balance account")
+		s.log.Warn(logrus.Fields{}, nil, err.Error())
+		s.repo.BaseRepository.Rollback(tx)
+		return
+	}
+
+	// commit transacton
+	s.repo.BaseRepository.Commit(tx)
+
+	return
+}
+
+func (s *accountService) TransactionInquiry(transactionInquiry *domain.TransactionInquiry) (Mutations *[]domain.TransactionMutations, err error) {
+	// initiate transaction
+	tx := s.repo.BaseRepository.Begin()
+
+	// validate account exist
+	isExist, err := s.repo.AccountRepository.CheckAccountExistByAccountNUmber(tx, transactionInquiry.AccountNumber)
+	if err != nil {
+		err = fmt.Errorf("failed to check exist rekening")
+		s.log.Warn(logrus.Fields{}, nil, err.Error())
+		s.repo.BaseRepository.Rollback(tx)
+		return
+	}
+
+	if !isExist {
+		err = fmt.Errorf("failed to create, rekening not exist")
+		s.log.Warn(logrus.Fields{}, nil, err.Error())
+		s.repo.BaseRepository.Rollback(tx)
+		return
+	}
+
+	// Get Balance by account number
+	Mutations, err = s.repo.TransactionRepository.GetTransactionsByAccountNumber(tx, transactionInquiry.AccountNumber)
+	if err != nil {
+		err = fmt.Errorf("failed to get balance account")
 		s.log.Warn(logrus.Fields{}, nil, err.Error())
 		s.repo.BaseRepository.Rollback(tx)
 		return

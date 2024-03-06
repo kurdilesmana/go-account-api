@@ -16,3 +16,11 @@ type CreateAccount struct {
 	PhoneNumber string `json:"phone_number" validate:"required"`
 	PIN         string `json:"pin" validate:"required"`
 }
+
+type BalanceInquiry struct {
+	AccountNumber string `json:"account_number" validate:"required"`
+}
+
+type TransactionInquiry struct {
+	AccountNumber string `json:"account_number" validate:"required"`
+}

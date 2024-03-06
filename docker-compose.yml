@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   postgres:
-    container_name: db_postgres
+    container_name: postgres
     image: postgres:14.2
     env_file:
       - .env
@@ -17,7 +17,7 @@ services:
       retries: 5
 
   go:
-    container_name: svc_account
+    container_name: account
     build:
       context: .
     env_file:

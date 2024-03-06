@@ -6,11 +6,13 @@ import (
 )
 
 type Services struct {
-	AccountService AccountService
+	AccountService     AccountService
+	TransactionService TransactionService
 }
 
 func InitServices(repos *repository.Repositories, log *logging.Logger) *Services {
 	return &Services{
-		AccountService: NewAccountService(repos, log),
+		AccountService:     NewAccountService(repos, log),
+		TransactionService: NewTransactionService(repos, log),
 	}
 }

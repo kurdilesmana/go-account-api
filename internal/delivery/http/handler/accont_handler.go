@@ -14,6 +14,8 @@ import (
 
 type AccountHandler interface {
 	CreateAccount(c echo.Context) error
+	BalanceInquiry(c echo.Context) error
+	Mutation(c echo.Context) error
 }
 
 type accountHandler struct {
@@ -48,4 +50,42 @@ func (h *accountHandler) CreateAccount(c echo.Context) (err error) {
 
 	h.log.Info(logrus.Fields{}, account, "done create account.")
 	return c.JSON(http.StatusCreated, map[string]string{"account_number": AccountNumber})
+}
+
+func (h *accountHandler) BalanceInquiry(c echo.Context) (err error) {
+	h.log.Info(logrus.Fields{}, nil, "Start balance inquiry request")
+	balanceInquiry := &domain.BalanceInquiry{AccountNumber: c.Param("account_number")}
+
+	h.log.Info(logrus.Fields{}, balanceInquiry, "validate balance inquiry request")
+	if err := h.validator.Validate(balanceInquiry); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"remark": err.Error()})
+	}
+
+	h.log.Info(logrus.Fields{}, balanceInquiry, "do balance inquiry...")
+	Balance, err := h.service.BalanceInquiry(balanceInquiry)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"remark": err.Error()})
+	}
+
+	h.log.Info(logrus.Fields{}, balanceInquiry, "done balance inquiry.")
+	return c.JSON(http.StatusCreated, map[string]float64{"balance": Balance})
+}
+
+func (h *accountHandler) Mutation(c echo.Context) (err error) {
+	h.log.Info(logrus.Fields{}, nil, "Start mutation request")
+	transactionInquiry := &domain.TransactionInquiry{AccountNumber: c.Param("account_number")}
+
+	h.log.Info(logrus.Fields{}, transactionInquiry, "validate mutation request")
+	if err := h.validator.Validate(transactionInquiry); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"remark": err.Error()})
+	}
+
+	h.log.Info(logrus.Fields{}, transactionInquiry, "do mutation...")
+	mutation, err := h.service.TransactionInquiry(transactionInquiry)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"remark": err.Error()})
+	}
+
+	h.log.Info(logrus.Fields{}, transactionInquiry, "done mutation.")
+	return c.JSON(http.StatusCreated, map[string]interface{}{"mutation": mutation})
 }

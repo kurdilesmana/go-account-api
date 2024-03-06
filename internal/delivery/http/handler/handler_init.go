@@ -8,11 +8,13 @@ import (
 )
 
 type Handlers struct {
-	AccountHandler AccountHandler
+	AccountHandler     AccountHandler
+	TransactionHandler TransactionHandler
 }
 
 func InitHandlers(services *service.Services, log *logging.Logger, validator *validator.RequestValidator) *Handlers {
 	return &Handlers{
-		AccountHandler: NewAccountHandler(services.AccountService, log, validator),
+		AccountHandler:     NewAccountHandler(services.AccountService, log, validator),
+		TransactionHandler: NewTransactionHandler(services.TransactionService, log, validator),
 	}
 }
