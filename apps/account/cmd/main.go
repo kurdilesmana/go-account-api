@@ -13,6 +13,7 @@ import (
 	"github.com/kurdilesmana/go-account-api/apps/account/pkg/logging"
 	"github.com/kurdilesmana/go-account-api/apps/account/pkg/validator"
 	"github.com/labstack/echo/v4"
+	"github.com/segmentio/kafka-go"
 	"github.com/spf13/viper"
 )
 
@@ -68,7 +69,7 @@ func main() {
 	writer := kafka.NewWriter(config)
 
 	// Kirim pesan ke Kafka
-	err := writer.WriteMessages(context.Background(),
+	err = writer.WriteMessages(context.Background(),
 		kafka.Message{
 			Key:   []byte("key-1"),
 			Value: []byte("Hello, Kafka!"),
